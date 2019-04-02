@@ -11,7 +11,7 @@ ISO_FILENAME="light_linux-${SCRIPT_VERSION}.iso"
 
 # BASE
 KERNEL_BRANCH="4.x" 
-KERNEL_VERSION="4.18.5"
+KERNEL_VERSION=""
 BUSYBOX_VERSION="1.30.1"
 SYSLINUX_VERSION="6.03"
 
@@ -200,19 +200,17 @@ prepare_dirs () {
 build_kernel () {
     cd ${SOURCEDIR}
 			
-    cd linux-${KERNEL_VERSION}
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig \
-        -j ${JFLAG}
-    sed -i "s/.*CONFIG_DEFAULT_HOSTNAME.*/CONFIG_DEFAULT_HOSTNAME=\"${LINUX_NAME}\"/" .config
-    sed -i "s/.*CONFIG_FB_VESA.*/CONFIG_FB_VESA=y/" .config
-    sed -i "s/.*LOGO_LINUX_CLUT224.*/LOGO_LINUX_CLUT224=y/" .config
-    cp ${BASEDIR}/light_os.ppm drivers/video/logo/logo_linux_clut224.ppm
-    sed -i "s/.*CONFIG_OVERLAY_FS.*/CONFIG_OVERLAY_FS=y/" .config
+    cd linux${KERNEL_VERSION}
+      
+    make clean
 
-    make bzImage \
-        -j ${JFLAG}
-     cp arch/$ARCH/boot/bzImage ${ISODIR}/kernel.gz
+    KERNEL=kernel7
+
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE bcm2709_defconfig
+
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE zImage modules dtbs
+    
+    cp arch/$ARCH/boot/bzImage ${ISODIR}/kernel.gz
 
     check_error_dialog "linux-${KERNEL_VERSION}"
 }
