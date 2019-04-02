@@ -206,9 +206,9 @@ build_kernel () {
 
     KERNEL=kernel7
 
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE bcm2709_defconfig
+    make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE bcm2709_defconfig
 
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE zImage modules dtbs
+    make -j$JFLAG  ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE zImage modules dtbs
     
     cp arch/$ARCH/boot/bzImage ${ISODIR}/kernel.gz
 
@@ -219,10 +219,10 @@ build_busybox () {
     cd ${SOURCEDIR}
 
     cd busybox-${BUSYBOX_VERSION}
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
+    make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
+    make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
     sed -i 's|.*CONFIG_STATIC.*|CONFIG_STATIC=y|' .config
-    make ARCH=$arm CROSS_COMPILE=$CROSS_COMPIL busybox \
+    make  ARCH=$arm CROSS_COMPILE=$CROSS_COMPIL busybox \
         -j ${JFLAG}
 
     make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE install \
@@ -267,8 +267,8 @@ build_ncurses () {
         LDFLAGS=-L$PWD/lib \
         CPPFLAGS="-P"
 
-    make -j ${JFLAG}
-    make install -j ${JFLAG}  \
+    make -j ${JFLAG} ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE install -j ${JFLAG}  \
         DESTDIR=${ROOTFSDIR}
     check_error_dialog "ncurses-${NCURSES_VERSION}"
 }
