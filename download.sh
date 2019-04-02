@@ -2,10 +2,12 @@
 
 rm -r sources
 
-git clone git@github.com:arjuncr/light-os.git
+git clone https://github.com/arjuncr/light-os.git
 
 mkdir sources
 
-cp -r light-os/* sources/
+git clone --depth=1 https://github.com/arjuncr/linux ./sources/linux
+
+mv  light-os/* sources/
 
 rm -r light-os
