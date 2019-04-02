@@ -21,6 +21,7 @@ NCURSES_VERSION="6.1"
 # CROSS COMPILE
 ARCH="arm"
 CROSS_COMPILE="arm-linux-gnueabihf-"
+MCPU="cortex-a7"
 
 BASEDIR=`realpath --no-symlinks $PWD`
 SOURCEDIR=${BASEDIR}/sources
@@ -431,7 +432,7 @@ test_qemu () {
     cd ${BASEDIR}
     if [ -f ${ISO_FILENAME} ];
     then
-        qemu-system-x86_64 -m 128M -cdrom ${ISO_FILENAME} -boot d -vga std
+        qemu-system-arm -m 256 -M raspi2 -serial stdio 
     fi
     check_error_dialog "${ISO_FILENAME}"
 }
