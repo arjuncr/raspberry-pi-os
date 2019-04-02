@@ -18,7 +18,7 @@ SYSLINUX_VERSION="6.03"
 # EXTRAS
 NCURSES_VERSION="6.1"
 
-#CROSS COMPILE
+# CROSS COMPILE
 ARCH="arm"
 CROSS_COMPILE="arm-linux-gnueabihf-"
 
@@ -50,7 +50,7 @@ show_main_menu () {
     4 "BUILD EXTRAS" \
     5 "GENERATE ROOTFS" \
     6 "GENERATE ISO" \
-    7 "TEST IMAGE IN QEMU" \
+    7 "TEST IMAGE IN ARM QEMU" \
     8 "CLEAN FILES" \
     9 "QUIT" 2> ${DIALOG_OUT}
 }
