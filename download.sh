@@ -8,7 +8,7 @@ mkdir sources
 
 git clone --depth=1 https://github.com/arjuncr/linux ./sources/linux
 
-git clone --depth=1 https://github.com/arjuncr/raspberry-pi-uboot.git ./source/uboot
+git clone --depth=1 https://github.com/arjuncr/raspberry-pi-uboot.git ./sources/uboot
 
 mv  light-os/* sources/
 

@@ -102,7 +102,7 @@ menu_prepare_dirs () {
 }
 
 select_arm_cross_gcc () {
-	CROSS_COMPILE=$BASEDIR/cross-gcc/gcc-arm-none-eabi-8-2018-q4-major/bin/$CROSS_COMPILE
+	CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_COMPILE
 }
 
 menu_build_kernel () {
@@ -222,7 +222,7 @@ build_kernel () {
     make -j$JFLAG  ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE zImage modules dtbs
     
 
-    check_error_dialog "linux-${KERNEL_VERSION}"
+    check_error_dialog "linux${KERNEL_VERSION}"
 }
 
 build_busybox () {
