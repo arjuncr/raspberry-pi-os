@@ -31,7 +31,7 @@ ISODIR=${BASEDIR}/iso
 
 CFLAGS="-march=native -O2 -pipe"
 CXXFLAGS="-march=native -O2 -pipe"
-JFLAG=4
+JFLAG=16
 
 MENU_ITEM_SELECTED=0
 DIALOG_OUT=/tmp/dialog_$$
@@ -255,7 +255,7 @@ build_uboot () {
 	KERNEL=kernel7
 
 	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
-	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE bcm2709_defconfig
+	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE rpi_2_defconfig
 	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
 
 	cp u-boot.bin ${ROOTFSDIR}
