@@ -14,6 +14,7 @@ KERNEL_BRANCH="4.x"
 KERNEL_VERSION=""
 BUSYBOX_VERSION="1.30.1"
 SYSLINUX_VERSION="6.03"
+UBOOT_VERSION="v2016.09.01"
 
 # EXTRAS
 NCURSES_VERSION="6.1"
@@ -48,12 +49,13 @@ show_main_menu () {
     1 "PREPARE DIRECTORIES AND ENV" \
     2 "BUILD KERNEL" \
     3 "BUILD BUSYBOX" \
-    4 "BUILD EXTRAS" \
-    5 "GENERATE ROOTFS" \
-    6 "GENERATE ISO" \
-    7 "TEST IMAGE IN ARM QEMU" \
-    8 "CLEAN FILES" \
-    9 "QUIT" 2> ${DIALOG_OUT}
+    4 "BUILD UBOOT"  \
+    5 "BUILD EXTRAS" \
+    6 "GENERATE ROOTFS" \
+    7 "GENERATE IMAGE" \
+    8 "TEST IMAGE IN ARM QEMU" \
+    9 "CLEAN FILES" \
+    10 "QUIT" 2> ${DIALOG_OUT}
 }
 
 show_dialog () {
@@ -86,35 +88,43 @@ check_error_dialog () {
 
 menu_introduction () {
     show_dialog "INTRODUCTION" "${LINUX_NAME} is an light linux based os" \
-    && MENU_ITEM_SELECTED=1
+    && MENU_ITEM_SELECTED=0
     return 0
 }
 
 menu_prepare_dirs () {
     ask_dialog "PREPARE DIRECTORIES" "Create empty folders to work with.\n - /sources for all the source code\n - /rootfs for our root tree\n - /iso for ISO file" \
     && prepare_dirs \
-    && MENU_ITEM_SELECTED=2 \
+    && MENU_ITEM_SELECTED=1 \
     && select_arm_cross_gcc \
     && show_dialog "PREPARE DIRECTORIES" "Done."
     return 0
 }
 
 select_arm_cross_gcc () {
-	export PATH=$PATH:../cross-gcc/gcc-arm-none-eabi-8-2018-q4-major/bin/
+	CROSS_COMPILE=$BASEDIR/cross-gcc/gcc-arm-none-eabi-8-2018-q4-major/bin/$CROSS_COMPILE
 }
 
 menu_build_kernel () {
     ask_dialog "BUILD KERNEL" "Linux Kernel ${KERNEL_VERSION} - this is the hearth of the operating system.\n\nRecipe:\n - extract\n - configure\n - build" \
     && build_kernel \
-    && MENU_ITEM_SELECTED=3 \
+    && MENU_ITEM_SELECTED=2 \
     && show_dialog "BUILD KERNEL" "Done."
     return 0
 }
 menu_build_busybox () {
     ask_dialog "BUILD BUSYBOX" "Build BusyBox ${BUSYBOX_VERSION} - all the basic stuff like cp, ls, etc.\n\nRecipe:\n - extract\n - configure\n - build" \
     && build_busybox \
-    && MENU_ITEM_SELECTED=4 \
+    && MENU_ITEM_SELECTED=3 \
     && show_dialog "BUILD BUSYBOX" "Done."
+    return 0
+}
+
+menu_build_uboot () { 
+    ask_dialog "BUILD UBOOT" "Build UBOOT ${UBOOT_VERSION} - all the basic stuff like cp, ls, etc.\n\nRecipe:\n - extract\n - configure\n -build" \
+    && build_uboot \
+    && MENU_ITEM_SELECTED=4 \
+    && show_dialog "BUILD U-BOOT" "Done."
     return 0
 }
 
@@ -168,12 +178,13 @@ loop_menu () {
         1) menu_prepare_dirs && loop_menu ;;
         2) menu_build_kernel && loop_menu ;;
         3) menu_build_busybox && loop_menu ;;
-        4) menu_build_extras && loop_menu ;;
-        5) menu_generate_rootfs && loop_menu ;;
-        6) menu_generate_iso && loop_menu ;;
-        7) menu_qemu && loop_menu ;;
-        8) menu_clean && loop_menu ;;
-        9) exit;;
+	4) menu_build_uboot  && loop_menu ;;
+        5) menu_build_extras && loop_menu ;;
+        6) menu_generate_rootfs && loop_menu ;;
+        7) menu_generate_iso && loop_menu ;;
+        8) menu_qemu && loop_menu ;;
+        9) menu_clean && loop_menu ;;
+        10) exit;;
     esac
 }
 
@@ -210,7 +221,6 @@ build_kernel () {
 
     make -j$JFLAG  ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE zImage modules dtbs
     
-    cp arch/$ARCH/boot/bzImage ${ISODIR}/kernel.gz
 
     check_error_dialog "linux-${KERNEL_VERSION}"
 }
@@ -219,6 +229,9 @@ build_busybox () {
     cd ${SOURCEDIR}
 
     cd busybox-${BUSYBOX_VERSION}
+
+    KERNEL=kernel7
+
     make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
     make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
     sed -i 's|.*CONFIG_STATIC.*|CONFIG_STATIC=y|' .config
@@ -233,6 +246,19 @@ build_busybox () {
     cp -R . ${ROOTFSDIR}
 
     check_error_dialog "busybox-${BUSYBOX_VERSION}"
+}
+
+build_uboot () {
+	cd ${SOURCEDIR}
+	cd uboot
+
+	KERNEL=kernel7
+
+	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE clean
+	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE bcm2709_defconfig
+	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
+
+	cp u-boot.bin ${ROOTFSDIR}
 }
 
 build_extras () {
