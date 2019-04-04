@@ -418,7 +418,7 @@ generate_image () {
 
 test_qemu () {
     cd ${BASEDIR}
-    if [ -f ${$IMAGE_NAME} ];
+    if [ -f ${IMAGE_NAME} ];
     then
 	qemu-system-arm -kernel kernel_qemu/kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -hda ${IMAGE_NAME}
     fi
