@@ -5,33 +5,36 @@
 
 SCRIPT_NAME="RASPBERRY PI OS"
 SCRIPT_VERSION="1.0"
-LINUX_NAME="LIGHT LINUX PI"
-DISTRIBUTION_VERSION="2019.2"
-ISO_FILENAME="light_linux-${SCRIPT_VERSION}.iso"
+export LINUX_NAME="LIGHT LINUX PI"
+export DISTRIBUTION_VERSION="2019.2"
+export IMAGE_NAME="minimal_rpi-${SCRIPT_VERSION}.img"
+export BUILD_OTHER_DIR="build_script_for_other"
 
 # BASE
-KERNEL_BRANCH="4.x" 
-KERNEL_VERSION=""
-BUSYBOX_VERSION="1.30.1"
-SYSLINUX_VERSION="6.03"
-UBOOT_VERSION="v2016.09.01"
+export KERNEL_BRANCH="4.x" 
+export KERNEL_VERSION=""
+export BUSYBOX_VERSION="1.30.1"
+export SYSLINUX_VERSION="6.03"
+export UBOOT_VERSION="v2016.09.01"
 
 # EXTRAS
-NCURSES_VERSION="6.1"
+export NCURSES_VERSION="6.1"
 
 # CROSS COMPILE
-ARCH="arm"
-CROSS_COMPILE="arm-linux-gnueabihf-"
-MCPU="cortex-a7"
+export ARCH="arm"
+export CROSS_GCC="arm-linux-gnueabihf-"
+export MCPU="cortex-a7"
 
-BASEDIR=`realpath --no-symlinks $PWD`
-SOURCEDIR=${BASEDIR}/sources
-ROOTFSDIR=${BASEDIR}/rootfs
-ISODIR=${BASEDIR}/iso
+export BASEDIR=`realpath --no-symlinks $PWD`
+export SOURCEDIR=${BASEDIR}/sources
+export ROOTFSDIR=${BASEDIR}/rootfs
+export IMGDIR=${BASEDIR}/img
 
-CFLAGS="-march=native -O2 -pipe"
-CXXFLAGS="-march=native -O2 -pipe"
-JFLAG=16
+export CFLAGS="-march=native -O2 -pipe"
+export CXXFLAGS="-march=native -O2 -pipe"
+export JFLAG=16
+
+export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
 
 MENU_ITEM_SELECTED=0
 DIALOG_OUT=/tmp/dialog_$$
@@ -93,7 +96,7 @@ menu_introduction () {
 }
 
 menu_prepare_dirs () {
-    ask_dialog "PREPARE DIRECTORIES" "Create empty folders to work with.\n - /sources for all the source code\n - /rootfs for our root tree\n - /iso for ISO file" \
+    ask_dialog "PREPARE DIRECTORIES" "Create empty folders to work with.\n - /sources for all the source code\n - /rootfs for our root tree\n - /img for img file" \
     && prepare_dirs \
     && MENU_ITEM_SELECTED=1 \
     && select_arm_cross_gcc \
@@ -102,7 +105,7 @@ menu_prepare_dirs () {
 }
 
 select_arm_cross_gcc () {
-	CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_COMPILE
+	export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
 }
 
 menu_build_kernel () {
@@ -144,11 +147,11 @@ menu_generate_rootfs () {
     return 0
 }
 
-menu_generate_iso () {
-    ask_dialog "GENERATE ISO" "Generate ISO image to boot from.\n\nRecipe:\n - download SysLinux \n - copy nessesary files to ISO directory\n - build image" \
-    && generate_iso \
+menu_generate_image () {
+    ask_dialog "GENERATE IMAGE" "Generate  img file  to boot from.\n\nRecipe: \n - copy nessesary files to rootfs directory\n - build image" \
+    && generate_image \
     && MENU_ITEM_SELECTED=7 \
-    && show_dialog "GENERATE ISO" "Done."
+    && show_dialog "GENERATE IMG FILE" "Done."
     return 0
 }
 
@@ -181,7 +184,7 @@ loop_menu () {
 	4) menu_build_uboot  && loop_menu ;;
         5) menu_build_extras && loop_menu ;;
         6) menu_generate_rootfs && loop_menu ;;
-        7) menu_generate_iso && loop_menu ;;
+        7) menu_generate_image && loop_menu ;;
         8) menu_qemu && loop_menu ;;
         9) menu_clean && loop_menu ;;
         10) exit;;
@@ -202,9 +205,9 @@ prepare_dirs () {
     then
         mkdir ${ROOTFSDIR}
     fi
-    if [ ! -d ${ISODIR} ];
+    if [ ! -d ${IMGDIR} ];
     then
-        mkdir ${ISODIR}
+        mkdir ${IMGDIR}
     fi
 }
 
@@ -245,6 +248,8 @@ build_busybox () {
     cd _install
     cp -R . ${ROOTFSDIR}
 
+    rm  ${ROOTFSDIR}/linuxrc
+
     check_error_dialog "busybox-${BUSYBOX_VERSION}"
 }
 
@@ -262,7 +267,9 @@ build_uboot () {
 }
 
 build_extras () {
-    build_ncurses
+    #build_ncurses
+    cd ${BASEDIR}/${BUILD_OTHER_DIR}
+    ./build_other_main.sh
 
     check_error_dialog "Building extras"
 
@@ -404,61 +411,18 @@ generate_rootfs () {
     check_error_dialog "rootfs"
 }
 
-generate_iso () {
-    if [ ! -d ${SOURCEDIR}/syslinux-${SYSLINUX_VERSION} ];
-    then
-        cd ${SOURCEDIR}
-        wget -O syslinux.tar.xz http://kernel.org/pub/linux/utils/boot/syslinux/syslinux-${SYSLINUX_VERSION}.tar.xz
-        tar -xvf syslinux.tar.xz && rm syslinux.tar.xz
-    fi
-    cd ${SOURCEDIR}/syslinux-${SYSLINUX_VERSION}
-    cp bios/core/isolinux.bin ${ISODIR}/
-    cp bios/com32/elflink/ldlinux/ldlinux.c32 ${ISODIR}
-    cp bios/com32/libutil/libutil.c32 ${ISODIR}
-    cp bios/com32/menu/menu.c32 ${ISODIR}
-    cd ${ISODIR}
-    rm isolinux.cfg && touch isolinux.cfg
-    echo 'default kernel.gz initrd=rootfs.gz vga=791' >> isolinux.cfg
-    echo 'UI menu.c32 ' >> isolinux.cfg
-    echo 'PROMPT 0 ' >> isolinux.cfg
-    echo >> isolinux.cfg
-    echo 'MENU TITLE LIGHT LINUX 2019.2 /'${SCRIPT_VERSION}': ' >> isolinux.cfg
-    echo 'TIMEOUT 60 ' >> isolinux.cfg
-    echo 'DEFAULT light linux ' >> isolinux.cfg
-    echo >> isolinux.cfg
-    echo 'LABEL light linux ' >> isolinux.cfg
-    echo ' MENU LABEL START LIGHT LINUX [KERNEL:'${KERNEL_VERSION}']' >> isolinux.cfg
-    echo ' KERNEL kernel.gz ' >> isolinux.cfg
-    echo ' APPEND initrd=rootfs.gz vga=791 ' >> isolinux.cfg
-    echo >> isolinux.cfg
-    echo 'LABEL light_linux_vga ' >> isolinux.cfg
-    echo ' MENU LABEL CHOOSE RESOLUTION ' >> isolinux.cfg
-    echo ' KERNEL kernel.gz ' >> isolinux.cfg
-    echo ' APPEND initrd=rootfs.gz vga=ask ' >> isolinux.cfg
-
-    rm ${BASEDIR}/${ISO_FILENAME}
-
-    xorriso \
-        -as mkisofs \
-        -o ${BASEDIR}/${ISO_FILENAME} \
-        -b isolinux.bin \
-        -c boot.cat \
-        -no-emul-boot \
-        -boot-load-size 4 \
-        -boot-info-table \
-        ./
-
-    check_error_dialog "generating ISO"
+generate_image () {
+	echo "not implimented"
 }
 
 
 test_qemu () {
     cd ${BASEDIR}
-    if [ -f ${ISO_FILENAME} ];
+    if [ -f ${$IMAGE_NAME} ];
     then
-        qemu-system-arm -m 256 -M raspi2 -serial stdio 
+	qemu-system-arm -kernel kernel_qemu/kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -hda ${IMAGE_NAME}
     fi
-    check_error_dialog "${ISO_FILENAME}"
+    check_error_dialog "${IMAGE_NAME}"
 }
 
 clean_files () {
