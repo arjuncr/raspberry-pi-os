@@ -1,2 +1,1 @@
-# arm-based-os
-minimal arm os
+Minimal os for raspberry pi with uboot.
