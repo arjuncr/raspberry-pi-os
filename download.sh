@@ -17,6 +17,11 @@ fi
 
 mkdir $RPI_BOOT
 
+if [ -d light-os ]
+then 
+rm -r light-os
+fi
+
 git clone https://github.com/arjuncr/light-os.git
  
 git clone --depth=1 https://github.com/arjuncr/linux ./$SOURCE/linux
