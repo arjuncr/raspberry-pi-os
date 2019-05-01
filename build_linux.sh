@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/shi
 # ******************************************************************************
-# LIGHT LINUX - 2019.4
+# RASPBERRY PI OS - 2019.4
 # ******************************************************************************
 
 SCRIPT_NAME="RASPBERRY PI OS"
@@ -29,6 +29,7 @@ export BASEDIR=`realpath --no-symlinks $PWD`
 export SOURCEDIR=${BASEDIR}/sources
 export ROOTFSDIR=${BASEDIR}/rootfs
 export IMGDIR=${BASEDIR}/img
+export RPI_BOOT=rpi_boot
 
 export CFLAGS="-march=native -O2 -pipe"
 export CXXFLAGS="-march=native -O2 -pipe"
@@ -429,6 +430,7 @@ clean_files () {
     sudo rm -rf ${SOURCEDIR}
     sudo rm -rf ${ROOTFSDIR}
     sudo rm -rf ${ISODIR}
+    sudo rm -rf ${RPI_BOOT}
 }
 
 # ******************************************************************************
