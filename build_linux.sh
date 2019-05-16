@@ -208,10 +208,11 @@ prepare_dirs () {
     fi
     if [ ! -d ${IMGDIR} ];
     then
-        mkdir ${IMGDIR}
-	mkdir ${IMGDIR}/bootloader
-	mkdir ${IMGDIR}/boot
-	mkdir ${IMGDIR}/kernel
+        mkdir    ${IMGDIR}
+	mkdir -p ${IMGDIR}/bootloader
+	mkdir -p ${IMGDIR}/boot
+	mkdir -p ${IMGDIR}/boot/overlay
+	mkdir -p ${IMGDIR}/kernel
     fi
 }
 
@@ -441,6 +442,7 @@ clean_files () {
     sudo rm -rf ${ROOTFSDIR}
     sudo rm -rf ${ISODIR}
     sudo rm -rf ${RPI_BOOT}
+    sudo rm -rf ${IMGDIR}
 }
 
 # ******************************************************************************
