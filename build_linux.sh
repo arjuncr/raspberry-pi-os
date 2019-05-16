@@ -29,7 +29,7 @@ export BASEDIR=`realpath --no-symlinks $PWD`
 export SOURCEDIR=${BASEDIR}/sources
 export ROOTFSDIR=${BASEDIR}/rootfs
 export IMGDIR=${BASEDIR}/img
-export RPI_BOOT=rpi_boot
+export RPI_BOOT=${BASEDIR}rpi_boot
 
 export CFLAGS=-m64
 export CXXFLAGS=-m64
