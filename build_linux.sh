@@ -4,9 +4,9 @@
 # ******************************************************************************
 
 SCRIPT_NAME="RASPBERRY PI OS"
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 export LINUX_NAME="LIGHT LINUX PI"
-export DISTRIBUTION_VERSION="2019.2"
+export DISTRIBUTION_VERSION="2019.4"
 export IMAGE_NAME="minimal_rpi-${SCRIPT_VERSION}.img"
 export BUILD_OTHER_DIR="build_script_for_other"
 
@@ -31,8 +31,8 @@ export ROOTFSDIR=${BASEDIR}/rootfs
 export IMGDIR=${BASEDIR}/img
 export RPI_BOOT=rpi_boot
 
-export CFLAGS="-march=native -O2 -pipe"
-export CXXFLAGS="-march=native -O2 -pipe"
+export CFLAGS= -m64
+export CXXFLAGS= -m64
 export JFLAG=16
 
 export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
@@ -209,6 +209,9 @@ prepare_dirs () {
     if [ ! -d ${IMGDIR} ];
     then
         mkdir ${IMGDIR}
+	mkdir ${IMGDIR}/bootloader
+	mkdir ${IMGDIR}/boot
+	mkdir ${IMGDIR}/kernel
     fi
 }
 
@@ -225,6 +228,13 @@ build_kernel () {
 
     make -j$JFLAG  ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE zImage modules dtbs
     
+
+    make modules_install
+
+    cp arch/arm/boot/dts/*.dtb            $IMGDIR/boot/
+    cp arch/arm/boot/dts/overlays/*.dtb*  $IMGDIR/boot/overlays/
+    cp arch/arm/boot/dts/overlays/README  $IMGDIR/booot/overlays/
+    cp arch/arm/boot/zImage               $IMGDIR/kernel/rpi-kernel.img
 
     check_error_dialog "linux${KERNEL_VERSION}"
 }
@@ -264,7 +274,7 @@ build_uboot () {
 	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE rpi_defconfig
 	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE u-boot.bin
 
-	cp u-boot.bin ${ROOTFSDIR}
+	cp u-boot.bin $IMGDIR/bootloader
 }
 
 build_extras () {
