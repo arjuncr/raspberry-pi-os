@@ -31,8 +31,8 @@ export ROOTFSDIR=${BASEDIR}/rootfs
 export IMGDIR=${BASEDIR}/img
 export RPI_BOOT=rpi_boot
 
-export CFLAGS= -m64
-export CXXFLAGS= -m64
+export CFLAGS=-m64
+export CXXFLAGS=-m64
 export JFLAG=16
 
 export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
