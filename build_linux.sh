@@ -4,9 +4,9 @@
 # ******************************************************************************
 
 SCRIPT_NAME="RASPBERRY PI OS"
-SCRIPT_VERSION="1.0"
+SCRIPT_VERSION="1.1"
 export LINUX_NAME="LIGHT LINUX PI"
-export DISTRIBUTION_VERSION="2019.2"
+export DISTRIBUTION_VERSION="2019.4"
 export IMAGE_NAME="minimal_rpi-${SCRIPT_VERSION}.img"
 export BUILD_OTHER_DIR="build_script_for_other"
 
@@ -31,8 +31,8 @@ export ROOTFSDIR=${BASEDIR}/rootfs
 export IMGDIR=${BASEDIR}/img
 export RPI_BOOT=rpi_boot
 
-export CFLAGS="-march=native -O2 -pipe"
-export CXXFLAGS="-march=native -O2 -pipe"
+export CFLAGS=-m64
+export CXXFLAGS=-m64
 export JFLAG=16
 
 export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
