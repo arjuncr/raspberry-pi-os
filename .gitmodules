@@ -1,3 +1,6 @@
 [submodule "light-os"]
 	path = light-os
 	url = https://github.com/arjuncr/light-os.git
+[submodule "raspberry-pi-uboot"]
+	path = raspberry-pi-uboot
+	url = https://github.com/arjuncr/raspberry-pi-uboot.git
