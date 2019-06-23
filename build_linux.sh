@@ -30,6 +30,7 @@ export SOURCEDIR=${BASEDIR}/light-os
 export ROOTFSDIR=${BASEDIR}/rootfs
 export IMGDIR=${BASEDIR}/img
 export RPI_BOOT=${BASEDIR}/rpi_boot
+export UBOOT_DIR=${BASEDIR}/raspberry-pi-uboot
 
 export CFLAGS=-m64
 export CXXFLAGS=-m64
@@ -266,10 +267,7 @@ build_busybox () {
 }
 
 build_uboot () {
-	cd ${SOURCEDIR}
-	cd uboot
-
-	KERNEL=kernel7
+	cd $UBOOT_DIR
 
 	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE distclean
 	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE rpi_defconfig
@@ -286,75 +284,6 @@ build_extras () {
     check_error_dialog "Building extras"
 
 }
-
-build_ncurses () {
-    cd ${SOURCEDIR}
-    
-    cd ncurses-${NCURSES_VERSION}
-    
-    if [ -f Makefile ] ; then
-        make -j ${JFLAG} clean
-    fi
-    sed -i '/LIBTOOL_INSTALL/d' c++/Makefile.in
-    CFLAGS="${CFLAGS}" ./configure \
-        --prefix=/usr \
-        --with-termlib \
-        --with-terminfo-dirs=/lib/terminfo \
-        --with-default-terminfo-dirs=/lib/terminfo \
-        --without-normal \
-        --without-debug \
-        --without-cxx-binding \
-        --with-abi-version=5 \
-        --enable-widec \
-        --enable-pc-files \
-        --with-shared \
-        CPPFLAGS=-I$PWD/ncurses/widechar \
-        LDFLAGS=-L$PWD/lib \
-        CPPFLAGS="-P"
-
-    make -j ${JFLAG} ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE install -j ${JFLAG}  \
-        DESTDIR=${ROOTFSDIR}
-    check_error_dialog "ncurses-${NCURSES_VERSION}"
-}
-
-build_nano () {
-    cd ${SOURCEDIR}
-
-    cd nano-${NANO_VERSION}
-    if [ -f Makefile ] ; then
-            make -j ${JFLAG} clean
-    fi
-    CFLAGS="${CFLAGS}" ./configure \
-        --prefix=/usr \
-        LDFLAGS=-L$PWD/lib
-
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j ${JFLAG}
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE install -j ${JFLAG} \
-        DESTDIR=${ROOTFSDIR}
-
-    check_error_dialog "nano-${NANO_VERSION}"
-}
-
-build_vim () {
-    cd ${SOURCEDIR}
-
-    cd vim${VIM_DIR}
-    if [ -f Makefile ] ; then
-            make -j ${JFLAG} clean
-    fi
-    CFLAGS="${CFLAGS}" ./configure \
-        --prefix=/usr \
-        LDFLAGS=-L$PWD/lib
-
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j ${JFLAG}
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE install \
-        -j ${JFLAG} \
-        DESTDIR=${ROOTFSDIR}
-
-    check_error_dialog "vim-${VIM_VERSION}"
-}
-
 
 generate_rootfs () {
     cd ${ROOTFSDIR}
@@ -373,7 +302,7 @@ generate_rootfs () {
     echo ' ------------------------------------ 2019.2 ' >> motd
     echo '                   "..^__                    ' >> motd
     echo '                   *,,-,_).-~                ' >> motd
-    echo '                 LIGHT LINUX PI              ' >> motd
+    echo '                 LIGHT RPI LINUX             ' >> motd
     echo '                                             ' >> motd
     echo '  ------------------------------------------ ' >> motd
     echo >> motd
