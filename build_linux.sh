@@ -1,12 +1,12 @@
 #!/bin/sh
 # ******************************************************************************
-# RASPBERRY PI OS - 2019.4
+# RASPBERRY PI OS - 2019.6
 # ******************************************************************************
 
 SCRIPT_NAME="RASPBERRY PI OS"
-SCRIPT_VERSION="1.1"
+export SCRIPT_VERSION="1.2"
 export LINUX_NAME="LIGHT LINUX PI"
-export DISTRIBUTION_VERSION="2019.4"
+export DISTRIBUTION_VERSION="2019.6"
 export IMAGE_NAME="minimal_rpi-${SCRIPT_VERSION}.img"
 export BUILD_OTHER_DIR="build_script_for_other"
 
@@ -26,7 +26,7 @@ export CROSS_GCC="arm-linux-gnueabihf-"
 export MCPU="cortex-a7"
 
 export BASEDIR=`realpath --no-symlinks $PWD`
-export SOURCEDIR=${BASEDIR}/sources
+export SOURCEDIR=${BASEDIR}/light-os
 export ROOTFSDIR=${BASEDIR}/rootfs
 export IMGDIR=${BASEDIR}/img
 export RPI_BOOT=${BASEDIR}/rpi_boot
