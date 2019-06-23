@@ -5,5 +5,5 @@
 	path = raspberry-pi-uboot
 	url = https://github.com/arjuncr/raspberry-pi-uboot.git
 [submodule "linux"]
-        path = linux
-        url = https://github.com/arjuncr/linux.git
+	path = linux
+	url = https://github.com/arjuncr/linux.git
