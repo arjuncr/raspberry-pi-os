@@ -31,6 +31,7 @@ export ROOTFSDIR=${BASEDIR}/rootfs
 export IMGDIR=${BASEDIR}/img
 export RPI_BOOT=${BASEDIR}/rpi_boot
 export UBOOT_DIR=${BASEDIR}/raspberry-pi-uboot
+export RPI_KERNEL_DIR=${BASEDIR}/linux
 
 export CFLAGS=-m64
 export CXXFLAGS=-m64
@@ -218,10 +219,8 @@ prepare_dirs () {
 }
 
 build_kernel () {
-    cd ${SOURCEDIR}
+    cd ${RPI_KERNEL_DIR}
 			
-    cd linux${KERNEL_VERSION}
-      
     make clean
 
     KERNEL=kernel7
