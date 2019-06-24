@@ -284,7 +284,7 @@ build_extras () {
 
 }
 
-generate_rootfs () {
+generate_rootfs () {	
     cd ${ROOTFSDIR}
     rm -f linuxrc
 
@@ -293,57 +293,170 @@ generate_rootfs () {
     mkdir proc
     mkdir src
     mkdir sys
+    mkdir var
+    mkdir var/log
+    mkdir srv
+    mkdir lib
+    mkdir root
+    mkdir boot
     mkdir tmp && chmod 1777 tmp
 
+    mkdir -pv usr/{,local/}{bin,include,lib{,64},sbin,src}
+    mkdir -pv usr/{,local/}share/{doc,info,locale,man}
+    mkdir -pv usr/{,local/}share/{misc,terminfo,zoneinfo}      
+    mkdir -pv usr/{,local/}share/man/man{1,2,3,4,5,6,7,8}
+    mkdir -pv etc/rc{0,1,2,3,4,5,6,S}.d
+    mkdir -pv etc/init.d
+    mkdir -pv etc/sys_init
+
     cd etc
+
+    if [ -f motd ]
+    then
+        rm motd
+    fi
+
     touch motd
     echo >> motd
-    echo ' ------------------------------------ 2019.2 ' >> motd
+    echo ' ----------------------$DISTRIBUTION_VERSION ' >> motd
     echo '                   "..^__                    ' >> motd
     echo '                   *,,-,_).-~                ' >> motd
-    echo '                 LIGHT RPI LINUX             ' >> motd
+    echo '               LIGHT LINUX RPI               ' >> motd
     echo '                                             ' >> motd
     echo '  ------------------------------------------ ' >> motd
     echo >> motd
+	
+    if [ -f hosts ]
+    then
+        rm hosts
+    fi
+    echo '127.0.0.1 lcalhost'>>hosts
 
-    touch bootscript.sh
-    echo '#!/bin/sh' >> bootscript.sh
-    echo 'dmesg -n 1' >> bootscript.sh
-    echo 'mount -t devtmpfs none /dev' >> bootscript.sh
-    echo 'mount -t proc none /proc' >> bootscript.sh
-    echo 'mount -t sysfs none /sys' >> bootscript.sh
-    echo >> bootscript.sh
-    chmod +x bootscript.sh
+    if [ -f resolv.conf ]
+    then
+        rm resolv.conf
+    fi
+
+    echo 'nameserver 8.8.8.8'>>resolv.conf
+    echo 'nameserver 8.8.4.4'>>resolv.conf
+
+    if [ -f fstab ]
+    then
+	rm fstab
+    fi	
+
+    touch fstab
+    echo '# file system  mount-point  type   options          dump   fsck'  >>fstab
+    echo '#                                                          order' >>fstab
+    echo 'rootfs          /               auto    defaults        1      1' >>fstab
+    echo 'proc            /proc           proc    defaults        0      0' >>fstab
+    echo 'sysfs           /sys            sysfs   defaults        0      0' >>fstab
+    echo 'devpts          /dev/pts        devpts  gid=4,mode=620  0      0' >>fstab
+    echo 'tmpfs           /dev/shm        tmpfs   defaults        0      0' >>fstab
+
+    rm -r init.d/*
+
+    install -m ${CONFMODE} ${BASEDIR}/${BOOT_SCRIPT_DIR}/rc.d/init.d/functions     init.d/functions
+    install -m ${CONFMODE} ${BASEDIR}/${BOOT_SCRIPT_DIR}/rc.d/init.d/network	   init.d/network
+    install -m ${MODE}     ${BASEDIR}/${BOOT_SCRIPT_DIR}/rc.d/startup              sys_init/startup
+    install -m ${MODE}     ${BASEDIR}/${BOOT_SCRIPT_DIR}/rc.d/shutdown             init.d/shutdown
+
+    chmod +x init.d/*
+
+    ln -s init.d/network   rc0.d/K01network
+    ln -s init.d/network   rc1.d/K01network
+    ln -s init.d/network   rc2.d/S01network
+    ln -s init.d/network   rc3.d/S01network
+    ln -s init.d/network   rc4.d/S01network
+    ln -s init.d/network   rc5.d/S01network
+    ln -s init.d/network   rc6.d/K01network
+    ln -s init.d/network   rcS.d/S01network
+	
+    if [ -f inittab ]
+    then
+        rm inittab
+    fi
 
     touch inittab
-    echo '::sysinit:/etc/bootscript.sh' >> inittab
-    echo '::restart:/sbin/init' >> inittab
-    echo '::ctrlaltdel:/sbin/reboot' >> inittab
-    echo '::once:cat /etc/motd' >> inittab
-    echo '::askfirst:-/bin/login' >> inittab
-    echo 'tty2::once:cat /etc/motd' >> inittab
-    echo 'tty2::askfirst:-/bin/sh' >> inittab
-    echo 'tty3::once:cat /etc/motd' >> inittab
-    echo 'tty3::askfirst:-/bin/sh' >> inittab
-    echo 'tty4::once:cat /etc/motd' >> inittab
-    echo 'tty4::askfirst:-/bin/sh' >> inittab
+    #echo 'id:2:initdefault:                   '>>inittab
+    echo '::sysinit:/etc/sys_init/startup     '>> inittab
+    echo 'l0:0:wait:/etc/rc0.d 0              '>> inittab
+    echo 'l1:1:wait:/etc/rc1.d 1              '>> inittab
+    echo 'l2:2:wait:/etc/rc2.d 2              '>> inittab
+    echo 'l3:3:wait:/etc/rc3.d 3              '>> inittab
+    echo 'l4:4:wait:/etc/rc4.d 4              '>> inittab
+    echo 'l5:5:wait:/etc/rc5.d 5              '>> inittab
+    echo 'l6:6:wait:/etc/rc6.d 6              '>> inittab
+    echo '::restart:/sbin/init                '>> inittab
+    echo '::shutdown:/etc/init.d/shutdown     '>> inittab
+    echo '::ctrlaltdel:/sbin/reboot           '>> inittab
+    echo '::once:cat /etc/motd                '>> inittab
+    echo '::askfirst:-/bin/login              '>> inittab
+    #echo 'tty1::respawn:/sbin/getty 38400 tty1'>> inittab
+    echo 'tty2::respawn:/sbin/getty 38400 tty2'>> inittab
+    echo 'tty3::respawn:/sbin/getty 38400 tty3'>> inittab
+    echo 'tty4::respawn:/sbin/getty 38400 tty4'>> inittab
     echo >> inittab
+
+    if [ -f group ]
+    then
+        rm group
+    fi
 
     touch group
     echo 'root:x:0:root' >> group
+    echo 'root:x:0:'     >>group
+    echo 'bin:x:1:'      >>group
+    echo 'sys:x:2:'      >>group
+    echo 'kmem:x:3:'     >>group
+    echo 'tty:x:4:'      >>group
+    echo 'daemon:x:6:'   >>group
+    echo 'disk:x:8:'     >>group
+    echo 'dialout:x:10:' >>group
+    echo 'video:x:12:'   >>group
+    echo 'utmp:x:13:'    >>group
+    echo 'usb:x:14:'     >>group
     echo >> group
+
+	
+    if [ -f passwd ]
+    then
+        rm passwd
+    fi
 
     touch passwd
     echo 'root:R.8MSU0Z/1ttM:0:0:Light Linux,,,:/root:/bin/sh' >> passwd
     echo >> passwd
 
     cd ${ROOTFSDIR}
+    
+    if [ -f init ]
+    then
+        rm init
+    fi
 
     touch init
     echo '#!/bin/sh' >> init
     echo 'exec /sbin/init' >> init
     echo >> init
     chmod +x init
+
+    #creating initial device node
+    mknod -m 622 dev/console c 5 1
+    mknod -m 666 dev/null c 1 3
+    mknod -m 666 dev/zero c 1 5
+    mknod -m 666 dev/ptmx c 5 2
+    mknod -m 666 dev/tty c 5 0
+    mknod -m 666 dev/tty1 c 4 1
+    mknod -m 666 dev/tty2 c 4 2
+    mknod -m 666 dev/tty3 c 4 3
+    mknod -m 666 dev/tty4 c 4 4
+    mknod -m 444 dev/random c 1 8
+    mknod -m 444 dev/urandom c 1 9
+    mknod -m 666 dev/ram b 1 1
+    mknod -m 666 dev/mem c 1 1
+    mknod -m 666 dev/kmem c 1 2
+    chown root:tty dev/{console,ptmx,tty,tty1,tty2,tty3,tty4}
 
     # sudo chown -R root:root .
     find . | cpio -R root:root -H newc -o | gzip > ${ISODIR}/rootfs.gz
