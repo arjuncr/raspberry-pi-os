@@ -32,6 +32,7 @@ export IMGDIR=${BASEDIR}/img
 export RPI_BOOT=${BASEDIR}/rpi_boot
 export UBOOT_DIR=${BASEDIR}/raspberry-pi-uboot
 export RPI_KERNEL_DIR=${BASEDIR}/linux
+export CONFIG_ETC_DIR="${BASEDIR}/os-configs/etc"
 
 export CFLAGS=-m64
 export CXXFLAGS=-m64
@@ -310,49 +311,15 @@ generate_rootfs () {
     mkdir -pv etc/sys_init
 
     cd etc
+    
+    cp $CONFIG_ETC_DIR/motd .
 
-    if [ -f motd ]
-    then
-        rm motd
-    fi
+    cp $CONFIG_ETC_DIR/hosts .
+  
+    cp $CONFIG_ETC_DIR/resolv.conf .
 
-    touch motd
-    echo >> motd
-    echo ' ----------------------$DISTRIBUTION_VERSION ' >> motd
-    echo '                   "..^__                    ' >> motd
-    echo '                   *,,-,_).-~                ' >> motd
-    echo '               LIGHT LINUX RPI               ' >> motd
-    echo '                                             ' >> motd
-    echo '  ------------------------------------------ ' >> motd
-    echo >> motd
-	
-    if [ -f hosts ]
-    then
-        rm hosts
-    fi
-    echo '127.0.0.1 lcalhost'>>hosts
+    cp $CONFIG_ETC_DIR/fstab .
 
-    if [ -f resolv.conf ]
-    then
-        rm resolv.conf
-    fi
-
-    echo 'nameserver 8.8.8.8'>>resolv.conf
-    echo 'nameserver 8.8.4.4'>>resolv.conf
-
-    if [ -f fstab ]
-    then
-	rm fstab
-    fi	
-
-    touch fstab
-    echo '# file system  mount-point  type   options          dump   fsck'  >>fstab
-    echo '#                                                          order' >>fstab
-    echo 'rootfs          /               auto    defaults        1      1' >>fstab
-    echo 'proc            /proc           proc    defaults        0      0' >>fstab
-    echo 'sysfs           /sys            sysfs   defaults        0      0' >>fstab
-    echo 'devpts          /dev/pts        devpts  gid=4,mode=620  0      0' >>fstab
-    echo 'tmpfs           /dev/shm        tmpfs   defaults        0      0' >>fstab
 
     rm -r init.d/*
 
@@ -372,73 +339,16 @@ generate_rootfs () {
     ln -s init.d/network   rc6.d/K01network
     ln -s init.d/network   rcS.d/S01network
 	
-    if [ -f inittab ]
-    then
-        rm inittab
-    fi
+    cp $CONFIG_ETC_DIR/inittab .
 
-    touch inittab
-    #echo 'id:2:initdefault:                   '>>inittab
-    echo '::sysinit:/etc/sys_init/startup     '>> inittab
-    echo 'l0:0:wait:/etc/rc0.d 0              '>> inittab
-    echo 'l1:1:wait:/etc/rc1.d 1              '>> inittab
-    echo 'l2:2:wait:/etc/rc2.d 2              '>> inittab
-    echo 'l3:3:wait:/etc/rc3.d 3              '>> inittab
-    echo 'l4:4:wait:/etc/rc4.d 4              '>> inittab
-    echo 'l5:5:wait:/etc/rc5.d 5              '>> inittab
-    echo 'l6:6:wait:/etc/rc6.d 6              '>> inittab
-    echo '::restart:/sbin/init                '>> inittab
-    echo '::shutdown:/etc/init.d/shutdown     '>> inittab
-    echo '::ctrlaltdel:/sbin/reboot           '>> inittab
-    echo '::once:cat /etc/motd                '>> inittab
-    echo '::askfirst:-/bin/login              '>> inittab
-    #echo 'tty1::respawn:/sbin/getty 38400 tty1'>> inittab
-    echo 'tty2::respawn:/sbin/getty 38400 tty2'>> inittab
-    echo 'tty3::respawn:/sbin/getty 38400 tty3'>> inittab
-    echo 'tty4::respawn:/sbin/getty 38400 tty4'>> inittab
-    echo >> inittab
+    cp $CONFIG_ETC_DIR/group .
 
-    if [ -f group ]
-    then
-        rm group
-    fi
-
-    touch group
-    echo 'root:x:0:root' >> group
-    echo 'root:x:0:'     >>group
-    echo 'bin:x:1:'      >>group
-    echo 'sys:x:2:'      >>group
-    echo 'kmem:x:3:'     >>group
-    echo 'tty:x:4:'      >>group
-    echo 'daemon:x:6:'   >>group
-    echo 'disk:x:8:'     >>group
-    echo 'dialout:x:10:' >>group
-    echo 'video:x:12:'   >>group
-    echo 'utmp:x:13:'    >>group
-    echo 'usb:x:14:'     >>group
-    echo >> group
-
-	
-    if [ -f passwd ]
-    then
-        rm passwd
-    fi
-
-    touch passwd
-    echo 'root:R.8MSU0Z/1ttM:0:0:Light Linux,,,:/root:/bin/sh' >> passwd
-    echo >> passwd
+    cp $CONFIG_ETC_DIR/passwd .
 
     cd ${ROOTFSDIR}
     
-    if [ -f init ]
-    then
-        rm init
-    fi
+    cp $CONFIG_ETC_DIR/init .
 
-    touch init
-    echo '#!/bin/sh' >> init
-    echo 'exec /sbin/init' >> init
-    echo >> init
     chmod +x init
 
     #creating initial device node
