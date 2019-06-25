@@ -36,7 +36,14 @@ export CONFIG_ETC_DIR="${BASEDIR}/os-configs/etc"
 
 export CFLAGS=-m64
 export CXXFLAGS=-m64
-export JFLAG=16
+
+#setting JFLAG
+if [ $1 -ne 0 ]
+then
+        export JFLAG=$1
+else
+        export JFLAG=4
+fi
 
 export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
 
