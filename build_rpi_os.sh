@@ -356,7 +356,8 @@ then
 build_kernel -b
 elif [ "$1" == "--rebuild-kernel" ]
 then
-build_kernel -r
+build_kernel -c
+build_kernel -b
 elif [ "$1" == "--clean-kernel" ]
 then
 build_kernel -c
@@ -367,7 +368,8 @@ then
 build_busybox -b
 elif [ "$1" == "--rebuild-busybox" ]
 then
-build_busybox -r
+build_busybox -c
+build_busybox -b
 elif [ "$1" == "--clean-busybox" ]
 then
 build_busybox -c
@@ -378,7 +380,8 @@ then
 build_uboot -b
 elif [ "$1" == "--rebuild-uboot" ]
 then
-build_uboot -r
+build_uboot -c
+build_uboot -b
 elif [ "$1" == "--clean-uboot" ]
 then
 build_uboot -c
@@ -386,13 +389,14 @@ fi
 
 if [ "$1" == "--build-other" ]
 then
-build_other -b
+build_extras -b
 elif [ "$1" == "--rebuild-other" ]
 then
-build_other -r
+build_extras -c
+build_extras -b
 elif [ "$1" == "--clean-other" ]
 then
-build_other -c
+build_extras -c
 fi
 
 if [ "$1" == "--create-rootfs" ]
