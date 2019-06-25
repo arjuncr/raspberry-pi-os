@@ -12,10 +12,9 @@ git pull
 
 git submodule update
 
-Building the os from source
+Building the os from source: (./build_rpi_os.sh) 
 
 ```
-root@debian-live:~/raspberry-pi-os# ./build_rpi_os.sh 
 #################################################################################
 
 ############################Utility to Build RPI OS##############################
@@ -48,6 +47,5 @@ Cleaning work dir: --clean-work-dir
 
 Test with Qemu --Run-qemu
 
-###################################################################################
-root@debian-live:~/raspberry-pi-os# 
+################################################################################### 
 ```
