@@ -38,11 +38,11 @@ export CFLAGS=-m64
 export CXXFLAGS=-m64
 
 #setting JFLAG
-if [ $1 -ne 0 ]
+if [ -z "$2" ]
 then
-        export JFLAG=$1
-else
         export JFLAG=4
+else
+        export JFLAG=$2
 fi
 
 export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
