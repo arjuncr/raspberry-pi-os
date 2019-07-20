@@ -51,6 +51,7 @@ export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
 
 prepare_dirs () {
     cd ${BASEDIR}
+    
     if [ ! -d ${SOURCEDIR} ];
     then
         mkdir ${SOURCEDIR}
@@ -267,7 +268,7 @@ build_all()
 build_kernel  -b
 build_busybox -b
 build_uboot   -b
-build_other   -b
+build_extras  -b
 }
 
 rebuild_all()
@@ -281,7 +282,7 @@ clean_all()
 build_kernel  -c
 build_busybox -c
 build_uboot   -c
-build_other   -c
+build_extras  -c
 }
 
 wipe_rebuild()
@@ -437,4 +438,3 @@ option $1
 
 #starting of script
 main $1 
-
