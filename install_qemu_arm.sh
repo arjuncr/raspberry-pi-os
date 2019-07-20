@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 QEMU="3.1.0"
 
