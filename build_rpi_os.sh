@@ -85,7 +85,7 @@ build_kernel () {
 
     	cp arch/arm/boot/dts/*.dtb            $IMGDIR/boot/
     	cp arch/arm/boot/dts/overlays/*.dtb*  $IMGDIR/boot/overlays/
-    	cp arch/arm/boot/dts/overlays/README  $IMGDIR/booot/overlays/
+    	cp arch/arm/boot/dts/overlays/README  $IMGDIR/boot/overlays/
     	cp arch/arm/boot/zImage               $IMGDIR/kernel/rpi-kernel.img
     fi   
 }
