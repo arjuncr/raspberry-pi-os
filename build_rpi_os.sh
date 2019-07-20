@@ -34,8 +34,8 @@ export UBOOT_DIR=${BASEDIR}/raspberry-pi-uboot
 export RPI_KERNEL_DIR=${BASEDIR}/linux
 export CONFIG_ETC_DIR="${BASEDIR}/os-configs/etc"
 
-export CFLAGS=-m64
-export CXXFLAGS=-m64
+#export CFLAGS=-m64
+#export CXXFLAGS=-m64
 
 #setting JFLAG
 if [ -z "$2" ]
