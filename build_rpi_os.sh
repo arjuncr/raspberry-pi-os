@@ -65,7 +65,7 @@ prepare_dirs () {
         mkdir    ${IMGDIR}
 	mkdir -p ${IMGDIR}/bootloader
 	mkdir -p ${IMGDIR}/boot
-	mkdir -p ${IMGDIR}/boot/overlay
+	mkdir -p ${IMGDIR}/boot/overlays
 	mkdir -p ${IMGDIR}/kernel
     fi
 }
