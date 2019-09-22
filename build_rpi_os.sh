@@ -4,9 +4,9 @@ int_build_env()
 {
 
 export SCRIPT_NAME="RASPBERRY PI OS"
-export SCRIPT_VERSION="1.2"
+export SCRIPT_VERSION="1.3"
 export LINUX_NAME="LIGHT LINUX PI"
-export DISTRIBUTION_VERSION="2019.6"
+export DISTRIBUTION_VERSION="2019.9"
 export IMAGE_NAME="minimal_rpi-${SCRIPT_VERSION}.img"
 export BUILD_OTHER_DIR="build_script_for_other"
 
