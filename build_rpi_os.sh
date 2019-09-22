@@ -225,7 +225,7 @@ generate_rootfs () {
     chown root:tty dev/{console,ptmx,tty,tty1,tty2,tty3,tty4}
 
     # sudo chown -R root:root .
-    find . | cpio -R root:root -H newc -o | gzip > ${ISODIR}/rootfs.gz
+    find . | cpio -R root:root -H newc -o | gzip > ${IMGDIR}/rootfs.gz
 }
 
 generate_image () {
