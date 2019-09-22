@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
     - name: Running a multi-line script
       run: |
+          git clone --recurse-submodules https://github.com/arjuncr/raspberry-pi-os.git
          ./build_rpi_os.sh --build-all
