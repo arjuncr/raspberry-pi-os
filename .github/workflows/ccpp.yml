@@ -6,7 +6,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
     steps:
     - name: Running a multi-line script
       run: |
