@@ -33,6 +33,7 @@ export RPI_BOOT=${BASEDIR}/rpi_boot
 export UBOOT_DIR=${BASEDIR}/raspberry-pi-uboot
 export RPI_KERNEL_DIR=${BASEDIR}/linux
 export CONFIG_ETC_DIR="${BASEDIR}/os-configs/etc"
+export RPI_BASE_BIN=${BASEDIR}/rpi_base_bin
 
 #export CFLAGS=-m64
 #export CXXFLAGS=-m64
@@ -229,7 +230,33 @@ generate_rootfs () {
 }
 
 generate_image () {
-	echo "Not implimented"
+
+	dd if=/dev/zero of=tmp.img iflag=fullblock bs=1M count=100 && sync
+
+	losetup loop30 tmp.img
+
+	mkfs -t ext4 /dev/loop30
+
+	mkdir /mnt/rpi-disk
+
+	mount /dev/loop30 /mnt/rpi-disk
+
+        cp ${RPI_BASE_BIN}/bootcode.bin /mnt/rpi-disk
+
+	cp ${RPI_BASE_BIN}/start.elf /mnt/rpi-disk
+
+	cp ${IMGDIR}/bootloader/u-boot.bin /mnt/rpi-disk/
+
+	echo "kernel=u-boot.bin" > /mnt/rpi-disk/config.txt
+
+        dd if=/dev/loop30 of=${IMAGE_NAME}
+
+	umount /dev/loop30
+
+	rm tmp.img
+
+	rmdir /mnt/rpi-disk
+
 }
 
 test_qemu () {
