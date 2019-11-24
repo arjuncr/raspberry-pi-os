@@ -8,9 +8,9 @@ int_build_env()
 {
 
 export SCRIPT_NAME="RASPBERRY PI OS"
-export SCRIPT_VERSION="1.3"
+export SCRIPT_VERSION="1.4"
 export LINUX_NAME="LIGHT LINUX PI"
-export DISTRIBUTION_VERSION="2019.9"
+export DISTRIBUTION_VERSION="2019.11"
 export IMAGE_NAME="minimal_rpi-${SCRIPT_VERSION}.img"
 export BUILD_OTHER_DIR="build_script_for_other"
 
@@ -19,14 +19,15 @@ export KERNEL_BRANCH="4.x"
 export KERNEL_VERSION=""
 export BUSYBOX_VERSION="1.30.1"
 export SYSLINUX_VERSION="6.03"
-export UBOOT_VERSION="v2016.09.01"
+export UBOOT_VERSION="2019.10"
 
 # EXTRAS
 export NCURSES_VERSION="6.1"
 
 # CROSS COMPILE
 export ARCH="arm"
-export CROSS_GCC="arm-linux-gnueabihf-"
+#export CROSS_GCC="arm-linux-gnueabihf-"
+export CROSS_GCC="arm-eabi-"
 export MCPU="cortex-a7"
 
 export BASEDIR=`realpath --no-symlinks $PWD`
@@ -50,7 +51,8 @@ else
         export JFLAG=$2
 fi
 
-export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
+#export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
+export CROSS_COMPILE=$BASEDIR/cross-gcc-8.3/bin/$CROSS_GCC
 
 }
 
@@ -123,6 +125,14 @@ build_busybox () {
 build_uboot () {
 	cd $UBOOT_DIR
         
+	if [ -f u-boot-2019.10.tar.bz2 ]
+	then
+		tar -xf u-boot-2019.10.tar.bz2
+		rm u-boot-2019.10.tar.bz2
+	fi	
+
+	cd u-boot-${UBOOT_VERSION}
+
 	if [ "$1" == "-c" ]
 	then       	
 		make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE distclean
