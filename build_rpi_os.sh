@@ -11,7 +11,7 @@ export SCRIPT_NAME="RASPBERRY PI OS"
 export SCRIPT_VERSION="1.4"
 export LINUX_NAME="acr-linux"
 export DISTRIBUTION_VERSION="2019.11"
-export IMAGE_NAME="minimal_rpi-${SCRIPT_VERSION}.img"
+export IMAGE_NAME="minimal-acrlinux-rpi-${SCRIPT_VERSION}.img"
 export BUILD_OTHER_DIR="build_script_for_other"
 
 # BASE
