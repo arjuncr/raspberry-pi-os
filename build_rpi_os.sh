@@ -243,32 +243,46 @@ generate_rootfs () {
 
 generate_image () {
 
-	dd if=/dev/zero of=tmp.img iflag=fullblock bs=1M count=100 && sync
 
-	losetup loop30 tmp.img
+	dd of=${IMAGE_NAME} seek=2200M bs=1 count=0
 
-	mkfs -t ext4 /dev/loop30
+	mkdir /mnt/rpi-boot
+	mkdir /mnt/rpi-rootfs
+	
+	parted ${IMAGE_NAME} mktable msdos
+	parted ${IMAGE_NAME} mkpart primary fat32 8192s 260MB
+	parted ${IMAGE_NAME} mkpart primary ext4 260MB 100%
 
-	mkdir /mnt/rpi-disk
+	dd if=/dev/zero of=${IMAGE_NAME} bs=1 count=440 conv=notrunc
 
-	mount /dev/loop30 /mnt/rpi-disk
+	losetup /dev/loop100 ${IMAGE_NAME} --offset $((8192*512)) --sizelimit $((499712*512))
+	losetup /dev/loop101 ${IMAGE_NAME} --offset $((507904*512)) --sizelimit $((3997696*512))
 
-        cp ${RPI_BASE_BIN}/bootcode.bin /mnt/rpi-disk
+	mkfs.vfat -F 32 -n BOOT /dev/loop100
+	mkfs.ext4 -L rootfs /dev/loop101
 
-	cp ${RPI_BASE_BIN}/start.elf /mnt/rpi-disk
 
-	cp ${IMGDIR}/bootloader/u-boot.bin /mnt/rpi-disk/
+	mount /dev/loop100 /mnt/rpi-boot
+	mount /dev/loop101 /mnt/rpi-rootfs
 
-	echo "kernel=u-boot.bin" > /mnt/rpi-disk/config.txt
+        cp -r ${RPI_BASE_BIN}/* /mnt/rpi-boot
+	cp ${IMGDIR}/bootloader/u-boot.bin /mnt/rpi-boot/
 
-        dd if=/dev/loop30 of=${IMAGE_NAME}
+	echo "kernel=u-boot.bin" >> /mnt/rpi-boot/config.txt
+	sed -i 's/root=PARTUUID=[a-z0-9]*-02/root=\/dev\/mmcblk0p2/' /mnt/rpi-boot/cmdline.txt
+	
 
-	umount /dev/loop30
+	#sed -i 's/^PARTUUID=[a-z0-9]*-01/\/dev\/mmcblk0p1/' /mnt/rpi-rootfs/etc/fstab
+	#sed -i 's/^PARTUUID=[a-z0-9]*-02/\/dev\/mmcblk0p2/' /mnt/rpi-rootfs/etc/fstab
+	
+	losetup -d /dev/loop100
+	losetup -d /dev/loop101
 
-	rm tmp.img
+	umount /dev/loop100
+	umount /dev/loop101
 
-	rmdir /mnt/rpi-disk
-
+	rm -r /mnt/rpi-boot
+	rm -r /mnt/rpi-rootfs
 }
 
 test_qemu () {
