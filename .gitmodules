@@ -7,3 +7,6 @@
 [submodule "light-os"]
 	path = light-os
 	url = https://github.com/arjuncr/light-os.git
+[submodule "cross-gcc-arm"]
+	path = cross-gcc-arm
+	url = https://gitlab.com/arjuncr00/cross-gcc-arm.git

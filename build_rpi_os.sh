@@ -8,9 +8,9 @@ int_build_env()
 {
 
 export SCRIPT_NAME="RASPBERRY PI OS"
-export SCRIPT_VERSION="1.4"
+export SCRIPT_VERSION="1.5"
 export LINUX_NAME="acr-linux"
-export DISTRIBUTION_VERSION="2019.11"
+export DISTRIBUTION_VERSION="2020.4"
 export IMAGE_NAME="minimal-acrlinux-rpi-${SCRIPT_VERSION}.img"
 export BUILD_OTHER_DIR="build_script_for_other"
 
@@ -26,8 +26,7 @@ export NCURSES_VERSION="6.1"
 
 # CROSS COMPILE
 export ARCH="arm"
-#export CROSS_GCC="arm-linux-gnueabihf-"
-export CROSS_GCC="arm-eabi-"
+export CROSS_GCC="arm-linux-gnueabihf-"
 export MCPU="cortex-a7"
 
 export BASEDIR=`realpath --no-symlinks $PWD`
@@ -51,8 +50,7 @@ else
         export JFLAG=$2
 fi
 
-#export CROSS_COMPILE=$BASEDIR/cross-gcc/arm-linux-gnueabihf/bin/$CROSS_GCC
-export CROSS_COMPILE=$BASEDIR/cross-gcc-8.3/bin/$CROSS_GCC
+export CROSS_COMPILE=$BASEDIR/cross-gcc-arm/gcc-arm-8.2-x86_64-arm-linux-gnueabihf/bin/$CROSS_GCC
 
 }
 
@@ -108,7 +106,7 @@ build_busybox () {
     elif [ "$1" == "-b" ]
     then	    
     	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
-    sed -i 's|.*CONFIG_STATIC.*|CONFIG_STATIC=y|' .config
+    	sed -i 's|.*CONFIG_STATIC.*|CONFIG_STATIC=y|' .config
     	make  ARCH=$arm CROSS_COMPILE=$CROSS_COMPIL busybox \
         	-j ${JFLAG}
 
@@ -116,7 +114,7 @@ build_busybox () {
         	-j ${JFLAG}
 
     	rm -rf ${ROOTFSDIR} && mkdir ${ROOTFSDIR}
-    cd _install
+    	cd _install
     	cp -R . ${ROOTFSDIR}
     	rm  ${ROOTFSDIR}/linuxrc
     fi
@@ -245,32 +243,43 @@ generate_rootfs () {
 
 generate_image () {
 
-	dd if=/dev/zero of=tmp.img iflag=fullblock bs=1M count=100 && sync
+	dd of=${IMAGE_NAME} seek=2200M bs=1 count=0
 
-	losetup loop30 tmp.img
+	mkdir /mnt/rpi-boot
+	mkdir /mnt/rpi-rootfs
+	
+	parted ${IMAGE_NAME} mktable msdos
+	parted ${IMAGE_NAME} mkpart primary fat32 8192s 260MB
+	parted ${IMAGE_NAME} mkpart primary ext4 260MB 100%
 
-	mkfs -t ext4 /dev/loop30
+	dd if=/dev/zero of=${IMAGE_NAME} bs=1 count=440 conv=notrunc
+	
+	losetup /dev/loop100 ${IMAGE_NAME} --offset $((8192*512)) --sizelimit $((499712*512))
+	losetup /dev/loop101 ${IMAGE_NAME} --offset $((507904*512)) --sizelimit $((3997696*512))
 
-	mkdir /mnt/rpi-disk
+	mkfs.vfat -F 32 -n BOOT /dev/loop100
+	mkfs.ext4 -L rootfs /dev/loop101
 
-	mount /dev/loop30 /mnt/rpi-disk
+	mount /dev/loop100 /mnt/rpi-boot
+	mount /dev/loop101 /mnt/rpi-rootfs
 
-        cp ${RPI_BASE_BIN}/bootcode.bin /mnt/rpi-disk
+        cp -r ${RPI_BASE_BIN}/* /mnt/rpi-boot
+	cp ${IMGDIR}/bootloader/u-boot.bin /mnt/rpi-boot/
 
-	cp ${RPI_BASE_BIN}/start.elf /mnt/rpi-disk
+	echo "kernel=u-boot.bin" >> /mnt/rpi-boot/config.txt
+	sed -i 's/root=PARTUUID=[a-z0-9]*-02/root=\/dev\/mmcblk0p2/' /mnt/rpi-boot/cmdline.txt
+	
+	#sed -i 's/^PARTUUID=[a-z0-9]*-01/\/dev\/mmcblk0p1/' /mnt/rpi-rootfs/etc/fstab
+	#sed -i 's/^PARTUUID=[a-z0-9]*-02/\/dev\/mmcblk0p2/' /mnt/rpi-rootfs/etc/fstab
+	
+	losetup -d /dev/loop100
+	losetup -d /dev/loop101
 
-	cp ${IMGDIR}/bootloader/u-boot.bin /mnt/rpi-disk/
+	umount /dev/loop100
+	umount /dev/loop101
 
-	echo "kernel=u-boot.bin" > /mnt/rpi-disk/config.txt
-
-        dd if=/dev/loop30 of=${IMAGE_NAME}
-
-	umount /dev/loop30
-
-	rm tmp.img
-
-	rmdir /mnt/rpi-disk
-
+	rm -r /mnt/rpi-boot
+	rm -r /mnt/rpi-rootfs
 }
 
 test_qemu () {
@@ -290,7 +299,6 @@ clean_files () {
     rm -rf ${IMGDIR}
     rm -rf ${UBOOT_DIR}
     rm -rf ${RPI_KERNEL_DIR}
-    
 }
 
 init_work_dir()
