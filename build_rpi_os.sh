@@ -8,9 +8,9 @@ int_build_env()
 {
 
 export SCRIPT_NAME="RASPBERRY PI OS"
-export SCRIPT_VERSION="1.4"
+export SCRIPT_VERSION="1.5"
 export LINUX_NAME="acr-linux"
-export DISTRIBUTION_VERSION="2019.11"
+export DISTRIBUTION_VERSION="2020.4"
 export IMAGE_NAME="minimal-acrlinux-rpi-${SCRIPT_VERSION}.img"
 export BUILD_OTHER_DIR="build_script_for_other"
 
@@ -106,7 +106,7 @@ build_busybox () {
     elif [ "$1" == "-b" ]
     then	    
     	make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE defconfig
-    sed -i 's|.*CONFIG_STATIC.*|CONFIG_STATIC=y|' .config
+    	sed -i 's|.*CONFIG_STATIC.*|CONFIG_STATIC=y|' .config
     	make  ARCH=$arm CROSS_COMPILE=$CROSS_COMPIL busybox \
         	-j ${JFLAG}
 
@@ -114,7 +114,7 @@ build_busybox () {
         	-j ${JFLAG}
 
     	rm -rf ${ROOTFSDIR} && mkdir ${ROOTFSDIR}
-    cd _install
+    	cd _install
     	cp -R . ${ROOTFSDIR}
     	rm  ${ROOTFSDIR}/linuxrc
     fi
@@ -243,7 +243,6 @@ generate_rootfs () {
 
 generate_image () {
 
-
 	dd of=${IMAGE_NAME} seek=2200M bs=1 count=0
 
 	mkdir /mnt/rpi-boot
@@ -254,13 +253,12 @@ generate_image () {
 	parted ${IMAGE_NAME} mkpart primary ext4 260MB 100%
 
 	dd if=/dev/zero of=${IMAGE_NAME} bs=1 count=440 conv=notrunc
-
+	
 	losetup /dev/loop100 ${IMAGE_NAME} --offset $((8192*512)) --sizelimit $((499712*512))
 	losetup /dev/loop101 ${IMAGE_NAME} --offset $((507904*512)) --sizelimit $((3997696*512))
 
 	mkfs.vfat -F 32 -n BOOT /dev/loop100
 	mkfs.ext4 -L rootfs /dev/loop101
-
 
 	mount /dev/loop100 /mnt/rpi-boot
 	mount /dev/loop101 /mnt/rpi-rootfs
@@ -271,7 +269,6 @@ generate_image () {
 	echo "kernel=u-boot.bin" >> /mnt/rpi-boot/config.txt
 	sed -i 's/root=PARTUUID=[a-z0-9]*-02/root=\/dev\/mmcblk0p2/' /mnt/rpi-boot/cmdline.txt
 	
-
 	#sed -i 's/^PARTUUID=[a-z0-9]*-01/\/dev\/mmcblk0p1/' /mnt/rpi-rootfs/etc/fstab
 	#sed -i 's/^PARTUUID=[a-z0-9]*-02/\/dev\/mmcblk0p2/' /mnt/rpi-rootfs/etc/fstab
 	
@@ -302,7 +299,6 @@ clean_files () {
     rm -rf ${IMGDIR}
     rm -rf ${UBOOT_DIR}
     rm -rf ${RPI_KERNEL_DIR}
-    
 }
 
 init_work_dir()
