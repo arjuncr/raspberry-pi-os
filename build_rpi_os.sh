@@ -343,6 +343,7 @@ clean_files () {
     rm -rf ${IMGDIR}
     rm -rf ${UBOOT_DIR}
     rm -rf ${RPI_KERNEL_DIR}
+    rm -rf ${WORKSPACE}
 }
 
 init_work_dir()
