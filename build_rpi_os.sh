@@ -38,6 +38,7 @@ export UBOOT_DIR=${BASEDIR}/raspberry-pi-uboot
 export RPI_KERNEL_DIR=${BASEDIR}/linux
 export CONFIG_ETC_DIR="${BASEDIR}/os-configs/etc"
 export RPI_BASE_BIN=${BASEDIR}/rpi_base_bin
+export WORKSPACE="${BASEDIR}/workspace"
 
 #export CFLAGS=-m64
 #export CXXFLAGS=-m64
@@ -73,11 +74,29 @@ prepare_dirs () {
 	mkdir -p ${IMGDIR}/boot/overlays
 	mkdir -p ${IMGDIR}/kernel
     fi
+    if [ ! -d ${WORKSPACE} ];
+    then
+	mkdir ${WORKSPACE}
+    fi
 }
 
 build_kernel () {
-    cd ${RPI_KERNEL_DIR}
-	
+
+    if [ ! -d ${WORKSPACE}/linux ];
+    then
+	    echo "copying kernel src to workspace"
+	    cp -r ${RPI_KERNEL_DIR} ${WORKSPACE}
+#	    echo "copying kernel patch to workspace"
+#	    cp -r kernel-patch ${WORKSPACE}
+#	    cd  ${WORKSPACE}/linux-${KERNEL_VERSION}
+#	    for patch in $(ls ../kernel-patch | grep '^[000-999]*_.*.patch'); do
+#		    echo "applying patch .... '$patch'."
+#		    patch -p1 < ../kernel-patch/${patch}
+#           done
+    fi
+
+    cd ${WORKSPACE}/linux
+    	
     if [ "$1" == "-c" ]
     then		    
     	make clean -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE
@@ -97,6 +116,18 @@ build_kernel () {
 
 build_busybox () {
     cd ${SOURCEDIR}
+
+    if [ ! -d ${WORKSPACE}/busybox-${BUSYBOX_VERSION} ];
+    then
+            cp -r busybox-${BUSYBOX_VERSION} ${WORKSPACE}
+#	    echo "copying busybox patch to workspace"
+#            cp -r busybox-patch ${WORKSPACE}
+#            cd  ${WORKSPACE}/busybox-${BUSYBOX_VERSION}
+#            for patch in $(ls ../busybox-patch | grep '^[000-999]*_.*.patch'); do
+#                echo "applying patch .... '$patch'."
+#                patch -p1 < ../busybox-patch/${patch}
+#            done
+    fi
 
     cd busybox-${BUSYBOX_VERSION}
 
@@ -126,11 +157,24 @@ build_uboot () {
 	if [ -f u-boot-2019.10.tar.bz2 ]
 	then
 		tar -xf u-boot-2019.10.tar.bz2
-		rm u-boot-2019.10.tar.bz2
+#		rm u-boot-2019.10.tar.bz2
 	fi	
 
-	cd u-boot-${UBOOT_VERSION}
+    	if [ ! -d   ${WORKSPACE}/u-boot-${UBOOT_VERSION} ];
+    	then
+	    echo "copying uboot to workspace"
+            cp -r  u-boot-${UBOOT_VERSION} ${WORKSPACE}
+#	    echo "copying uboot patch to workspace"
+#           cp -r uboot-patch ${WORKSPACE}
+#           cd   u-boot-${UBOOT_VERSION}
+#           for patch in $(ls ../uboot-patch | grep '^[000-999]*_.*.patch'); do
+#                echo "applying patch .... '$patch'."
+#                patch -p1 < ../uboot-patch/${patch}
+#            done
+    	fi
 
+	cd u-boot-${UBOOT_VERSION}
+	
 	if [ "$1" == "-c" ]
 	then       	
 		make -j$JFLAG ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE distclean
@@ -344,7 +388,7 @@ help_msg()
 {
 echo -e "#################################################################################\n"
 
-echo -e "############################Utility to Build RPI OS##############################\n"
+echo -e "#############$SCRIPT_VERSIONUtility to Build RPI OS##############################\n"
 
 echo -e "#################################################################################\n"
 
