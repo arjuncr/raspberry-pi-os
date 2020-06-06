@@ -8,7 +8,7 @@ int_build_env()
 {
 
 export SCRIPT_NAME="RASPBERRY PI OS"
-export SCRIPT_VERSION="1.6"
+export SCRIPT_VERSION="1.7"
 export LINUX_NAME="acr-linux"
 export DISTRIBUTION_VERSION="2020.5"
 export IMAGE_NAME="minimal-acrlinux-rpi-${SCRIPT_VERSION}.img"
